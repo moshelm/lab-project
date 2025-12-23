@@ -16,7 +16,7 @@ class Database:
         return self.name
 
     def create_table(self, table_name:str, fields:tuple[str]):
-        fields = ',\n'.join(fields)
+        fields = ','.join(fields)
         if not fields:
             raise ValueError
         sql = f"""
@@ -34,10 +34,12 @@ id INT AUTO_INCREMENT PRIMARY KEY,
                INSERT INTO `{table_name}` ({fields})
                VALUES ({flags});""")
         self.cursor.execute(sql,values)
+        new_id = self.cursor.lastrowid
         self.conn.commit()
+        return new_id
 
     def get_all(self,table_name:str):
-        sql = f"USE `{self.name}`;SELECT * FROM `{table_name}`;"
+        sql = f"SELECT * FROM `{table_name}`;"
         self.cursor.execute(sql)
         result = [row for row in self.cursor]
         print(result)
@@ -49,14 +51,19 @@ id INT AUTO_INCREMENT PRIMARY KEY,
             updates.append(f"{field} = %s")
 
         sql = f"""UPDATE  `{table_name}` SET {','.join(updates)} WHERE id = %s;"""
-        values = tuple(list(update_info.values()).append(record_id))
+        l_update_info = list(update_info.values())
+        l_update_info.append(record_id)
+        values = tuple(l_update_info)
 
         self.cursor.execute(sql,values)
         self.conn.commit()
 
     def delete_record(self,table_name:str, record_id:int):
         sql = f"DELETE FROM {table_name} WHERE id = %s"
-        value = record_id
+        value = (record_id,)
         self.cursor.execute(sql,value)
         self.conn.commit()
+
+
+
 
