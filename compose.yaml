@@ -2,12 +2,15 @@ services:
   api:
     build: ./app
     container_name: api_service
+    restart: unless-stopped
+
     ports:
       - "8000:8000"
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       - DB_HOST=${DB_HOST}
 
@@ -15,14 +18,19 @@ services:
   db:
     image: mysql:8.0
     container_name: db_service
-    restart: always
+    restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${DB_NAME}
+    healthcheck:
+      test: mysqladmin ping
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/sql/init.sql
     ports:
       - "3307:3306"
 
