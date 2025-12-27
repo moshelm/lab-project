@@ -7,3 +7,6 @@ use docker compose up -d
 **technology**
 * python
 * docker  
+
+for start:
+docker compose up -d
