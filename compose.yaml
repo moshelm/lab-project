@@ -26,11 +26,12 @@ services:
       test: mysqladmin ping
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 3
+      start_period: 30s
 
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./sql/init.sql:/docker-entrypoint-initdb.d/sql/init.sql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "3307:3306"
 
